@@ -11,9 +11,16 @@ Download and install `cfssl` and `cfssljson`:
 
 ### OS X
 
+I prefer to use [Homebrew](https://brew.sh) instead of prebuilt binaries:
+
 ```
-curl -o cfssl https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssl
-curl -o cfssljson https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/darwin/cfssljson
+brew install cfssl
+```
+However if you prefer prebuilt binaries:
+
+```
+curl -o cfssl https://github.com/cloudflare/cfssl/releases/download/v1.4.1/cfssl_1.4.1_darwin_amd64
+curl -o cfssljson https://github.com/cloudflare/cfssl/releases/download/v1.4.1/cfssljson_1.4.1_darwin_amd64
 ```
 
 ```
@@ -24,18 +31,12 @@ chmod +x cfssl cfssljson
 sudo mv cfssl cfssljson /usr/local/bin/
 ```
 
-Some OS X users may experience problems using the pre-built binaries in which case [Homebrew](https://brew.sh) might be a better option:
-
-```
-brew install cfssl
-```
-
 ### Linux
 
 ```
 wget -q --show-progress --https-only --timestamping \
-  https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/cfssl \
-  https://storage.googleapis.com/kubernetes-the-hard-way/cfssl/linux/cfssljson
+  https://github.com/cloudflare/cfssl/releases/download/v1.4.1/cfssl_1.4.1_linux_amd64 \
+  https://github.com/cloudflare/cfssl/releases/download/v1.4.1/cfssljson_1.4.1_linux_amd64
 ```
 
 ```
@@ -48,7 +49,7 @@ sudo mv cfssl cfssljson /usr/local/bin/
 
 ### Verification
 
-Verify `cfssl` and `cfssljson` version 1.3.4 or higher is installed:
+Verify `cfssl` and `cfssljson` version 1.4.1 or higher is installed:
 
 ```
 cfssl version
@@ -57,18 +58,16 @@ cfssl version
 > output
 
 ```
-Version: 1.3.4
-Revision: dev
-Runtime: go1.13
+Version: 1.4.1
+Runtime: go1.14.3
 ```
 
 ```
 cfssljson --version
 ```
 ```
-Version: 1.3.4
-Revision: dev
-Runtime: go1.13
+Version: 1.4.1
+Runtime: go1.14.3
 ```
 
 ## Install kubectl
@@ -105,7 +104,7 @@ sudo mv kubectl /usr/local/bin/
 
 ### Verification
 
-Verify `kubectl` version 1.15.3 or higher is installed:
+Verify `kubectl` version 1.18.3 or higher is installed:
 
 ```
 kubectl version --client
