@@ -64,7 +64,6 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 default         _gateway        0.0.0.0         UG    100    0        0 enp0s3
 10.0.2.0        0.0.0.0         255.255.255.0   U     0      0        0 enp0s3
 _gateway        0.0.0.0         255.255.255.255 UH    100    0        0 enp0s3
-10.200.0.0      worker-0        255.255.255.0   UG    0      0        0 enp0s8
 10.200.1.0      worker-1        255.255.255.0   UG    0      0        0 enp0s8
 10.200.2.0      worker-2        255.255.255.0   UG    0      0        0 enp0s8
 192.168.100.0   0.0.0.0         255.255.255.0   U     0      0        0 enp0s8
