@@ -19,15 +19,15 @@ The target audience for this tutorial is someone planning to support a productio
 
 Kubernetes The Hard Way guides you through bootstrapping a highly available Kubernetes cluster with end-to-end encryption between components and RBAC authentication.
 
-* [kubernetes](https://github.com/kubernetes/kubernetes) 1.15.3
-* [containerd](https://github.com/containerd/containerd) 1.2.9
-* [coredns](https://github.com/coredns/coredns) v1.6.3
+* [kubernetes](https://github.com/kubernetes/kubernetes) 1.18.3
+* [containerd](https://github.com/containerd/containerd) 1.3.4
+* [coredns](https://github.com/coredns/coredns) v1.6.9
 * [cni](https://github.com/containernetworking/cni) v0.7.1
-* [etcd](https://github.com/coreos/etcd) v3.4.0
+* [etcd](https://github.com/coreos/etcd) v3.4.9
 
 ## Labs
 
-This tutorial assumes you have access to the [Google Cloud Platform](https://cloud.google.com). While GCP is used for basic infrastructure requirements the lessons learned in this tutorial can be applied to other platforms.
+This tutorial assumes you have [Vagrant](https://vagrantup.com) installed. While vagrant is used for basic infrastructure requirements the lessons learned in this tutorial can be applied to other platforms.
 
 * [Prerequisites](docs/01-prerequisites.md)
 * [Installing the Client Tools](docs/02-client-tools.md)
