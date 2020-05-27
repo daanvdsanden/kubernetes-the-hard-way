@@ -6,7 +6,10 @@ This tutorial leverages [Vagrant](https://vagrantup.com/) to streamline provisio
 
 ## Install vagrant
 
-To install vagrant please follow the instructions for your operating system at the [Vagrant website](https://www.vagrantup.com/intro/getting-started/install.html).
+To install vagrant please follow the instructions for your operating system at the [Vagrant website](https://www.vagrantup.com/intro/getting-started/install.html). Please make sure you also install the vagrant plugin vagrant-host. This plugin will update all host files of the machines in the vagrant file with its hostsnames.
+```
+vagrant plugin install vagrant-hosts
+```
 
 ## Running Commands in Parallel with tmux
 
