@@ -204,7 +204,7 @@ EOF
 ### Verification
 
 ```
-kubectl get componentstatuses --kubeconfig admin.kubeconfig
+kubectl get componentstatuses
 ```
 
 ```
