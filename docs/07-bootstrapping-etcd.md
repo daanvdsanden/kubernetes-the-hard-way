@@ -4,10 +4,10 @@ Kubernetes components are stateless and store cluster state in [etcd](https://gi
 
 ## Prerequisites
 
-The commands in this lab must be run on each controller instance: `controller-0`, `controller-1`, and `controller-2`. Login to each controller instance using the `gcloud` command. Example:
+The commands in this lab must be run on each controller instance: `controller-0`, `controller-1`, and `controller-2`. Login to each controller instance using the `vagrant ssh` command. Example:
 
 ```
-gcloud compute ssh controller-0
+vagrant ssh controller-0
 ```
 
 ### Running commands in parallel with tmux
@@ -22,15 +22,15 @@ Download the official etcd release binaries from the [etcd](https://github.com/e
 
 ```
 wget -q --show-progress --https-only --timestamping \
-  "https://github.com/etcd-io/etcd/releases/download/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz"
+  "https://github.com/etcd-io/etcd/releases/download/v3.4.9/etcd-v3.4.9-linux-amd64.tar.gz"
 ```
 
 Extract and install the `etcd` server and the `etcdctl` command line utility:
 
 ```
 {
-  tar -xvf etcd-v3.4.0-linux-amd64.tar.gz
-  sudo mv etcd-v3.4.0-linux-amd64/etcd* /usr/local/bin/
+  tar -xvf etcd-v3.4.9-linux-amd64.tar.gz
+  sudo mv etcd-v3.4.9-linux-amd64/etcd* /usr/local/bin/
 }
 ```
 
@@ -39,15 +39,16 @@ Extract and install the `etcd` server and the `etcdctl` command line utility:
 ```
 {
   sudo mkdir -p /etc/etcd /var/lib/etcd
+  cd /vagrant
   sudo cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+  cd -
 }
 ```
 
 The instance internal IP address will be used to serve client requests and communicate with etcd cluster peers. Retrieve the internal IP address for the current compute instance:
 
 ```
-INTERNAL_IP=$(curl -s -H "Metadata-Flavor: Google" \
-  http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip)
+INTERNAL_IP=$(ip -4 --oneline addr | grep -v secondary | grep -oP '(192\.168\.100\.[0-9]{1,3})(?=/)')
 ```
 
 Each etcd member must have a unique name within an etcd cluster. Set the etcd name to match the hostname of the current compute instance:
@@ -81,7 +82,7 @@ ExecStart=/usr/local/bin/etcd \\
   --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
   --advertise-client-urls https://${INTERNAL_IP}:2379 \\
   --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster controller-0=https://10.240.0.10:2380,controller-1=https://10.240.0.11:2380,controller-2=https://10.240.0.12:2380 \\
+  --initial-cluster controller-0=https://192.168.100.10:2380,controller-1=https://192.168.100.11:2380,controller-2=https://192.168.100.12:2380 \\
   --initial-cluster-state new \\
   --data-dir=/var/lib/etcd
 Restart=on-failure
@@ -119,9 +120,9 @@ sudo ETCDCTL_API=3 etcdctl member list \
 > output
 
 ```
-3a57933972cb5131, started, controller-2, https://10.240.0.12:2380, https://10.240.0.12:2379
-f98dc20bce6225a0, started, controller-0, https://10.240.0.10:2380, https://10.240.0.10:2379
-ffed16798470cab5, started, controller-1, https://10.240.0.11:2380, https://10.240.0.11:2379
+1a82afa2247e7562, started, controller-2, https://192.168.100.12:2380, https://192.168.100.12:2379, false
+9b08d67746040f15, started, controller-0, https://192.168.100.10:2380, https://192.168.100.10:2379, false
+b9a27230d536d1e8, started, controller-1, https://192.168.100.11:2380, https://192.168.100.11:2379, false
 ```
 
 Next: [Bootstrapping the Kubernetes Control Plane](08-bootstrapping-kubernetes-controllers.md)
