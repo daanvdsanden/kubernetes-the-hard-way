@@ -36,11 +36,11 @@ cat > ca-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "Kubernetes",
       "OU": "CA",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -78,11 +78,11 @@ cat > admin-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "system:masters",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -122,27 +122,24 @@ cat > ${instance}-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "system:nodes",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
 EOF
 
-EXTERNAL_IP=$(gcloud compute instances describe ${instance} \
-  --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
-
-INTERNAL_IP=$(gcloud compute instances describe ${instance} \
-  --format 'value(networkInterfaces[0].networkIP)')
+INTERNAL_IP=$(vagrant ssh ${instance} -- "ip -4 --oneline addr | \
+  grep -v secondary | grep -oP '(192\.168\.100\.[0-9]{1,3})(?=/)'")
 
 cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
   -config=ca-config.json \
-  -hostname=${instance},${EXTERNAL_IP},${INTERNAL_IP} \
+  -hostname=${instance},${INTERNAL_IP} \
   -profile=kubernetes \
   ${instance}-csr.json | cfssljson -bare ${instance}
 done
@@ -175,11 +172,11 @@ cat > kube-controller-manager-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "system:kube-controller-manager",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -219,11 +216,11 @@ cat > kube-proxy-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "system:node-proxier",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -262,11 +259,11 @@ cat > kube-scheduler-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "system:kube-scheduler",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -314,11 +311,11 @@ cat > kubernetes-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "Kubernetes",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -328,7 +325,7 @@ cfssl gencert \
   -ca=ca.pem \
   -ca-key=ca-key.pem \
   -config=ca-config.json \
-  -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,${KUBERNETES_HOSTNAMES} \
+  -hostname=10.32.0.1,192.168.100.10,192.168.100.11,192.168.100.12,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,${KUBERNETES_HOSTNAMES} \
   -profile=kubernetes \
   kubernetes-csr.json | cfssljson -bare kubernetes
 
@@ -362,11 +359,11 @@ cat > service-account-csr.json <<EOF
   },
   "names": [
     {
-      "C": "US",
-      "L": "Portland",
+      "C": "NL",
+      "L": "Hilversum",
       "O": "Kubernetes",
       "OU": "Kubernetes The Hard Way",
-      "ST": "Oregon"
+      "ST": "Noord-Holland"
     }
   ]
 }
@@ -388,27 +385,5 @@ Results:
 service-account-key.pem
 service-account.pem
 ```
-
-
-## Distribute the Client and Server Certificates
-
-Copy the appropriate certificates and private keys to each worker instance:
-
-```
-for instance in worker-0 worker-1 worker-2; do
-  gcloud compute scp ca.pem ${instance}-key.pem ${instance}.pem ${instance}:~/
-done
-```
-
-Copy the appropriate certificates and private keys to each controller instance:
-
-```
-for instance in controller-0 controller-1 controller-2; do
-  gcloud compute scp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
-    service-account-key.pem service-account.pem ${instance}:~/
-done
-```
-
-> The `kube-proxy`, `kube-controller-manager`, `kube-scheduler`, and `kubelet` client certificates will be used to generate client authentication configuration files in the next lab.
 
 Next: [Generating Kubernetes Configuration Files for Authentication](05-kubernetes-configuration-files.md)
