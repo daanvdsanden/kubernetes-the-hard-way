@@ -14,6 +14,7 @@ Vagrant.configure(2) do |config|
       node.vm.hostname = "controller-#{i}"
       node.vm.network "private_network", ip: "192.168.100.1#{i}"
       node.vm.provision :hosts, :sync_hosts => true
+      node.vm.provision :hosts, :add_localhost_hostnames => false
       node.vm.provider "virtualbox" do |vb|
         vb.name = "controller-#{i}"
         vb.cpus = 2
@@ -28,6 +29,7 @@ Vagrant.configure(2) do |config|
       node.vm.hostname = "worker-#{i}"
       node.vm.network "private_network", ip: "192.168.100.2#{i}"
       node.vm.provision :hosts, :sync_hosts => true
+      node.vm.provision :hosts, :add_localhost_hostnames => false
       node.vm.provider "virtualbox" do |vb|
         vb.name = "worker-#{i}"
       end
