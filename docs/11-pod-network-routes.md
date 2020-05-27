@@ -24,7 +24,11 @@ In this section you will gather the information required to create routes in the
 
 
 ## Routes
-
+Retrieve the current POD cidr and internal ip:
+```
+POD_CIDR="10.200.$(uname -n | awk -F- '{print $2}').0/24"
+INTERNAL_IP=$(ip -4 --oneline addr | grep -v secondary | grep -oP '(192\.168\.100\.[0-9]{1,3})(?=/)')
+```
 Create network routes for each worker instance:
 
 ```
@@ -39,6 +43,8 @@ cat >> 50-vagrant.yaml <<EOF
         via: 192.168.100.2${i}
 EOF
 done
+sed -i "/to: ${POD_CIDR}/d" 50-vagrant.yaml
+sed -i "/via: ${INTERNAL_IP}/d" 50-vagrant.yaml
 sudo cp 50-vagrant.yaml /etc/netplan/
 sudo netplan apply
 }
