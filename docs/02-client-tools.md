@@ -75,9 +75,15 @@ Runtime: go1.14.3
 The `kubectl` command line utility is used to interact with the Kubernetes API Server. Download and install `kubectl` from the official release binaries:
 
 ### OS X
+I prefer to use Homebrew instead of prebuilt binaries:
+```
+brew install kubernetes-cli@1.18.3
+```
+
+However if you prefer prebuilt binaries:
 
 ```
-curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/darwin/amd64/kubectl
+curl -o kubectl https://storage.googleapis.com/kubernetes-release/release/v1.18.3/bin/darwin/amd64/kubectl
 ```
 
 ```
