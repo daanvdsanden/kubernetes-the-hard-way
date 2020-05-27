@@ -31,7 +31,7 @@ The Vagrantfile contains the configuration of the lab setup. Below I will explai
 
 ### Kubernetes Controllers
 
-Create three compute instances which will host the Kubernetes control plane:
+The following lines describe the compute instances which will host the Kubernetes control plane:
 
 ```ruby
   (0..2).each do |i|
@@ -52,110 +52,123 @@ Create three compute instances which will host the Kubernetes control plane:
 ### Kubernetes Workers
 
 The following lines describe the three compute instances which will host the Kubernetes worker nodes:
-https://github.com/daanvdsanden/kubernetes-the-hard-way/blob/a1c76051673e7b799ab3b310f9b4432534707af9/Vagrantfile#L24
 
-```
-for i in 0 1 2; do
-  gcloud compute instances create worker-${i} \
-    --async \
-    --boot-disk-size 200GB \
-    --can-ip-forward \
-    --image-family ubuntu-1804-lts \
-    --image-project ubuntu-os-cloud \
-    --machine-type n1-standard-1 \
-    --metadata pod-cidr=10.200.${i}.0/24 \
-    --private-network-ip 10.240.0.2${i} \
-    --scopes compute-rw,storage-ro,service-management,service-control,logging-write,monitoring \
-    --subnet kubernetes \
-    --tags kubernetes-the-hard-way,worker
-done
+```ruby
+  (0..2).each do |i|
+    config.vm.define "worker-#{i}" do |node|
+      node.vm.hostname = "worker-#{i}"
+      node.vm.network "private_network", ip: "192.168.100.2#{i}"
+      node.vm.provision :hosts, :sync_hosts => true
+      node.vm.provider "virtualbox" do |vb|
+        vb.name = "worker-#{i}"
+      end
+    end
+  end
 ```
 
-### Verification
+### Deploy the machines
 
-List the compute instances in your default compute zone:
-
-```
-gcloud compute instances list
-```
-
-> output
+Install the machines on your computer/lab:
 
 ```
-NAME          ZONE        MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
-controller-0  us-west1-c  n1-standard-1               10.240.0.10  XX.XXX.XXX.XXX  RUNNING
-controller-1  us-west1-c  n1-standard-1               10.240.0.11  XX.XXX.X.XX     RUNNING
-controller-2  us-west1-c  n1-standard-1               10.240.0.12  XX.XXX.XXX.XX   RUNNING
-worker-0      us-west1-c  n1-standard-1               10.240.0.20  XXX.XXX.XXX.XX  RUNNING
-worker-1      us-west1-c  n1-standard-1               10.240.0.21  XX.XXX.XX.XXX   RUNNING
-worker-2      us-west1-c  n1-standard-1               10.240.0.22  XXX.XXX.XX.XX   RUNNING
+vagrant up
 ```
 
-## Configuring SSH Access
-
-SSH will be used to configure the controller and worker instances. When connecting to compute instances for the first time SSH keys will be generated for you and stored in the project or instance metadata as described in the [connecting to instances](https://cloud.google.com/compute/docs/instances/connecting-to-instance) documentation.
-
-Test SSH access to the `controller-0` compute instances:
+To verify that all machines installed correctly:
+```
+vagrant status
+```
+> Output
 
 ```
-gcloud compute ssh controller-0
+Current machine states:
+
+controller-0              running (virtualbox)
+controller-1              running (virtualbox)
+controller-2              running (virtualbox)
+worker-0                  running (virtualbox)
+worker-1                  running (virtualbox)
+worker-2                  running (virtualbox)
+
+This environment represents multiple VMs. The VMs are all listed
+above with their current state. For more information about a specific
+VM, run `vagrant status NAME`.
 ```
 
-If this is your first time connecting to a compute instance SSH keys will be generated for you. Enter a passphrase at the prompt to continue:
-
+## Configuring floating IP
+TODO: setup instruction cluster setup
 ```
-WARNING: The public SSH key file for gcloud does not exist.
-WARNING: The private SSH key file for gcloud does not exist.
-WARNING: You do not have an SSH key for gcloud.
-WARNING: SSH keygen will be executed to generate a key.
-Generating public/private rsa key pair.
-Enter passphrase (empty for no passphrase):
-Enter same passphrase again:
-```
-
-At this point the generated SSH keys will be uploaded and stored in your project:
-
-```
-Your identification has been saved in /home/$USER/.ssh/google_compute_engine.
-Your public key has been saved in /home/$USER/.ssh/google_compute_engine.pub.
-The key fingerprint is:
-SHA256:nz1i8jHmgQuGt+WscqP5SeIaSy5wyIJeL71MuV+QruE $USER@$HOSTNAME
-The key's randomart image is:
-+---[RSA 2048]----+
-|                 |
-|                 |
-|                 |
-|        .        |
-|o.     oS        |
-|=... .o .o o     |
-|+.+ =+=.+.X o    |
-|.+ ==O*B.B = .   |
-| .+.=EB++ o      |
-+----[SHA256]-----+
-Updating project ssh metadata...-Updated [https://www.googleapis.com/compute/v1/projects/$PROJECT_ID].
-Updating project ssh metadata...done.
-Waiting for SSH key to propagate.
-```
-
-After the SSH keys have been updated you'll be logged into the `controller-0` instance:
-
-```
-Welcome to Ubuntu 18.04.3 LTS (GNU/Linux 4.15.0-1042-gcp x86_64)
-...
-
-Last login: Sun Sept 14 14:34:27 2019 from XX.XXX.XXX.XX
-```
-
-Type `exit` at the prompt to exit the `controller-0` compute instance:
-
-```
-$USER@controller-0:~$ exit
+sudo pcs cluster auth controller-0 controller-1 controller-2 -u hacluster -p just-for-learning --force
 ```
 > output
+```
+controller-0: Authorized
+controller-2: Authorized
+controller-1: Authorized
+```
 
 ```
-logout
-Connection to XX.XXX.XXX.XXX closed
+sudo pcs cluster setup --name controller controller-0 controller-1 controller-2 -u hacluster -p just-for-learning --force
 ```
+> Output
+```
+Destroying cluster on nodes: controller-0, controller-1, controller-2...
+controller-0: Stopping Cluster (pacemaker)...
+controller-2: Stopping Cluster (pacemaker)...
+controller-1: Stopping Cluster (pacemaker)...
+controller-2: Successfully destroyed cluster
+controller-0: Successfully destroyed cluster
+controller-1: Successfully destroyed cluster
+
+Sending 'pacemaker_remote authkey' to 'controller-0', 'controller-1', 'controller-2'
+controller-0: successful distribution of the file 'pacemaker_remote authkey'
+controller-1: successful distribution of the file 'pacemaker_remote authkey'
+controller-2: successful distribution of the file 'pacemaker_remote authkey'
+Sending cluster config files to the nodes...
+controller-0: Succeeded
+controller-1: Succeeded
+controller-2: Succeeded
+
+Synchronizing pcsd certificates on nodes controller-0, controller-1, controller-2...
+controller-0: Success
+controller-2: Success
+controller-1: Success
+Restarting pcsd on the nodes in order to reload the certificates...
+controller-0: Success
+controller-1: Success
+controller-2: Success
+```
+
+```
+sudo pcs cluster enable --all
+controller-0: Cluster Enabled
+controller-1: Cluster Enabled
+controller-2: Cluster Enabled
+```
+> Output
+```
+sudo pcs cluster start --all
+controller-0: Starting Cluster...
+controller-1: Starting Cluster...
+controller-2: Starting Cluster...
+```
+> Output
+```
+sudo pcs property set stonith-enabled=false
+sudo pcs resource create floating_ip ocf:heartbeat:IPaddr2 ip=192.168.100.100 cidr_netmask=24 op monitor interval=30s
+```
+Verify by pinging from the client or any of the six machines:
+```
+ping -c3 192.168.100.100
+PING 192.168.100.100 (192.168.100.100): 56 data bytes
+64 bytes from 192.168.100.100: icmp_seq=0 ttl=64 time=0.398 ms
+64 bytes from 192.168.100.100: icmp_seq=1 ttl=64 time=0.520 ms
+64 bytes from 192.168.100.100: icmp_seq=2 ttl=64 time=0.326 ms
+
+--- 192.168.100.100 ping statistics ---
+3 packets transmitted, 3 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 0.326/0.415/0.520/0.080 ms
+```
+
 
 Next: [Provisioning a CA and Generating TLS Certificates](04-certificate-authority.md)
