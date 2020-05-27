@@ -23,24 +23,36 @@ TODO: commands for the cluster setup
 ```
 NOTE: Don't use this in production! Use a external loadbalancer or make sure you setup [fencing](https://clusterlabs.org/pacemaker/doc/deprecated/en-US/Pacemaker/1.1-plugin/html/Clusters_from_Scratch/ch09.html) correctly in your cluster.
 
-## Compute Instances
+## Compute Instances using vagrant
 
 The compute instances in this lab will be provisioned using [Ubuntu Server](https://www.ubuntu.com/server) 18.04, which has good support for the [containerd container runtime](https://github.com/containerd/containerd). Each compute instance will be provisioned with a fixed private IP address to simplify the Kubernetes bootstrapping process.
+
+The Vagrantfile contains the configuration of the lab setup. Below I will explain how the file is build and at the end we will create all the machines.
 
 ### Kubernetes Controllers
 
 Create three compute instances which will host the Kubernetes control plane:
 
-```
+```ruby
+  (0..2).each do |i|
+    config.vm.define "controller-#{i}" do |node|
+      node.vm.hostname = "controller-#{i}"
+      node.vm.network "private_network", ip: "192.168.100.1#{i}"
+      node.vm.provision :hosts, :sync_hosts => true
+      node.vm.provider "virtualbox" do |vb|
+        vb.name = "controller-#{i}"
+        vb.cpus = 2
+        vb.memory = 2048
+      end
+      node.vm.provision "shell", path: "cluster.sh"
+    end
+  end
 ```
 
 ### Kubernetes Workers
 
-Each worker instance requires a pod subnet allocation from the Kubernetes cluster CIDR range. The pod subnet allocation will be used to configure container networking in a later exercise. The `pod-cidr` instance metadata will be used to expose pod subnet allocations to compute instances at runtime.
-
-> The Kubernetes cluster CIDR range is defined by the Controller Manager's `--cluster-cidr` flag. In this tutorial the cluster CIDR range will be set to `10.200.0.0/16`, which supports 254 subnets.
-
-Create three compute instances which will host the Kubernetes worker nodes:
+The following lines describe the three compute instances which will host the Kubernetes worker nodes:
+https://github.com/daanvdsanden/kubernetes-the-hard-way/blob/a1c76051673e7b799ab3b310f9b4432534707af9/Vagrantfile#L24
 
 ```
 for i in 0 1 2; do
