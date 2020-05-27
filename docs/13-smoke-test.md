@@ -16,8 +16,8 @@ kubectl create secret generic kubernetes-the-hard-way \
 Print a hexdump of the `kubernetes-the-hard-way` secret stored in etcd:
 
 ```
-gcloud compute ssh controller-0 \
-  --command "sudo ETCDCTL_API=3 etcdctl get \
+vagrant ssh controller-0 - \
+  "sudo ETCDCTL_API=3 etcdctl get \
   --endpoints=https://127.0.0.1:2379 \
   --cacert=/etc/etcd/ca.pem \
   --cert=/etc/etcd/kubernetes.pem \
@@ -32,17 +32,24 @@ gcloud compute ssh controller-0 \
 00000010  73 2f 64 65 66 61 75 6c  74 2f 6b 75 62 65 72 6e  |s/default/kubern|
 00000020  65 74 65 73 2d 74 68 65  2d 68 61 72 64 2d 77 61  |etes-the-hard-wa|
 00000030  79 0a 6b 38 73 3a 65 6e  63 3a 61 65 73 63 62 63  |y.k8s:enc:aescbc|
-00000040  3a 76 31 3a 6b 65 79 31  3a 44 ac 6e ac 11 2f 28  |:v1:key1:D.n../(|
-00000050  02 46 3d ad 9d cd 68 be  e4 cc 63 ae 13 e4 99 e8  |.F=...h...c.....|
-00000060  6e 55 a0 fd 9d 33 7a b1  17 6b 20 19 23 dc 3e 67  |nU...3z..k .#.>g|
-00000070  c9 6c 47 fa 78 8b 4d 28  cd d1 71 25 e9 29 ec 88  |.lG.x.M(..q%.)..|
-00000080  7f c9 76 b6 31 63 6e ea  ac c5 e4 2f 32 d7 a6 94  |..v.1cn..../2...|
-00000090  3c 3d 97 29 40 5a ee e1  ef d6 b2 17 01 75 a4 a3  |<=.)@Z.......u..|
-000000a0  e2 c2 70 5b 77 1a 0b ec  71 c3 87 7a 1f 68 73 03  |..p[w...q..z.hs.|
-000000b0  67 70 5e ba 5e 65 ff 6f  0c 40 5a f9 2a bd d6 0e  |gp^.^e.o.@Z.*...|
-000000c0  44 8d 62 21 1a 30 4f 43  b8 03 69 52 c0 b7 2e 16  |D.b!.0OC..iR....|
-000000d0  14 a5 91 21 29 fa 6e 03  47 e2 06 25 45 7c 4f 8f  |...!).n.G..%E|O.|
-000000e0  6e bb 9d 3b e9 e5 2d 9e  3e 0a                    |n..;..-.>.|
+00000040  3a 76 31 3a 6b 65 79 31  3a 17 94 21 73 23 48 20  |:v1:key1:..!s#H |
+00000050  1d 7c da 68 fe 0d eb a3  58 b6 41 21 8c 2d d4 91  |.|.h....X.A!.-..|
+00000060  d1 7f 4a eb 65 c6 ae ce  9d d0 0c 40 32 71 ba 0b  |..J.e......@2q..|
+00000070  0a ab b7 af 66 bd ad 46  6d 10 37 e4 ff 1c c6 74  |....f..Fm.7....t|
+00000080  97 78 12 ac 33 af b8 74  0d c0 8f 4c 6e 0a 74 d9  |.x..3..t...Ln.t.|
+00000090  6e 50 19 31 f4 56 0d 20  4d 35 16 ba 7a b7 c2 7e  |nP.1.V. M5..z..~|
+000000a0  a7 f2 42 aa 61 0d c2 e1  ac 0b 93 c5 51 b5 17 05  |..B.a.......Q...|
+000000b0  a6 84 da e3 86 90 43 6a  2e e2 12 5f 3e 9c 74 ea  |......Cj..._>.t.|
+000000c0  f1 6a 84 13 f4 a0 1e 19  af 86 d1 36 d4 5f 00 37  |.j.........6._.7|
+000000d0  a2 ef c2 99 bb 09 b0 32  bc 9d d2 e0 ab 46 d1 41  |.......2.....F.A|
+000000e0  8b 4c 37 11 65 7a 30 3d  0f bf ba ef f3 9e 52 58  |.L7.ez0=......RX|
+000000f0  47 87 6b a5 a2 a4 de 25  30 a7 fc a4 20 4f 9c 15  |G.k....%0... O..|
+00000100  dc 56 77 98 42 59 99 7e  3a 28 53 84 af 07 4b 9a  |.Vw.BY.~:(S...K.|
+00000110  40 fa 56 e1 c5 9f b3 ad  d7 54 37 f1 81 69 3c f3  |@.V......T7..i<.|
+00000120  99 78 5c e3 f3 04 bd af  40 c7 de c8 3d 9d 5e be  |.x\.....@...=.^.|
+00000130  40 e0 7e b9 1f d9 2e ee  1f 4c 83 18 d1 f1 f3 48  |@.~......L.....H|
+00000140  98 c2 b8 b5 1a e1 0b 90  4f 0a                    |........O.|
+0000014a
 ```
 
 The etcd key should be prefixed with `k8s:enc:aescbc:v1:key1`, which indicates the `aescbc` provider was used to encrypt the data with the `key1` encryption key.
@@ -66,8 +73,8 @@ kubectl get pods -l app=nginx
 > output
 
 ```
-NAME                     READY   STATUS    RESTARTS   AGE
-nginx-554b9c67f9-vt5rn   1/1     Running   0          10s
+NAME                    READY   STATUS    RESTARTS   AGE
+nginx-f89759699-zsdgp   1/1     Running   0          13s
 ```
 
 ### Port Forwarding
@@ -103,13 +110,13 @@ curl --head http://127.0.0.1:8080
 
 ```
 HTTP/1.1 200 OK
-Server: nginx/1.17.3
-Date: Sat, 14 Sep 2019 21:10:11 GMT
+Server: nginx/1.17.10
+Date: Wed, 27 May 2020 18:25:23 GMT
 Content-Type: text/html
 Content-Length: 612
-Last-Modified: Tue, 13 Aug 2019 08:50:00 GMT
+Last-Modified: Tue, 14 Apr 2020 14:19:26 GMT
 Connection: keep-alive
-ETag: "5d5279b8-264"
+ETag: "5e95c66e-264"
 Accept-Ranges: bytes
 ```
 
@@ -135,7 +142,7 @@ kubectl logs $POD_NAME
 > output
 
 ```
-127.0.0.1 - - [14/Sep/2019:21:10:11 +0000] "HEAD / HTTP/1.1" 200 0 "-" "curl/7.52.1" "-"
+127.0.0.1 - - [27/May/2020:18:25:23 +0000] "HEAD / HTTP/1.1" 200 0 "-" "curl/7.64.1" "-"
 ```
 
 ### Exec
@@ -151,7 +158,7 @@ kubectl exec -ti $POD_NAME -- nginx -v
 > output
 
 ```
-nginx version: nginx/1.17.3
+nginx version: nginx/1.17.10
 ```
 
 ## Services
@@ -173,38 +180,46 @@ NODE_PORT=$(kubectl get svc nginx \
   --output=jsonpath='{range .spec.ports[0]}{.nodePort}')
 ```
 
-Create a firewall rule that allows remote access to the `nginx` node port:
-
-```
-gcloud compute firewall-rules create kubernetes-the-hard-way-allow-nginx-service \
-  --allow=tcp:${NODE_PORT} \
-  --network kubernetes-the-hard-way
-```
-
-Retrieve the external IP address of a worker instance:
-
-```
-EXTERNAL_IP=$(gcloud compute instances describe worker-0 \
-  --format 'value(networkInterfaces[0].accessConfigs[0].natIP)')
-```
 
 Make an HTTP request using the external IP address and the `nginx` node port:
 
 ```
-curl -I http://${EXTERNAL_IP}:${NODE_PORT}
+for i in 0 1 2; do
+  curl -I http://192.168.100.2${i}:${NODE_PORT}
+done
 ```
 
 > output
 
 ```
 HTTP/1.1 200 OK
-Server: nginx/1.17.3
-Date: Sat, 14 Sep 2019 21:12:35 GMT
+Server: nginx/1.17.10
+Date: Wed, 27 May 2020 18:41:15 GMT
 Content-Type: text/html
 Content-Length: 612
-Last-Modified: Tue, 13 Aug 2019 08:50:00 GMT
+Last-Modified: Tue, 14 Apr 2020 14:19:26 GMT
 Connection: keep-alive
-ETag: "5d5279b8-264"
+ETag: "5e95c66e-264"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.17.10
+Date: Wed, 27 May 2020 18:41:15 GMT
+Content-Type: text/html
+Content-Length: 612
+Last-Modified: Tue, 14 Apr 2020 14:19:26 GMT
+Connection: keep-alive
+ETag: "5e95c66e-264"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.17.10
+Date: Wed, 27 May 2020 18:41:15 GMT
+Content-Type: text/html
+Content-Length: 612
+Last-Modified: Tue, 14 Apr 2020 14:19:26 GMT
+Connection: keep-alive
+ETag: "5e95c66e-264"
 Accept-Ranges: bytes
 ```
 
